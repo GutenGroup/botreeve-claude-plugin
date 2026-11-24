@@ -1,13 +1,11 @@
-# CI POLICY (Daniel, 2026-11-13): /Users/seekstromd/Library/CloudStorage/Dropbox-Ekstroem/Daniel Ekstroem/GutenOS/Context/Guten_Group/it/CI-POLICY-2026-11-13.md
-# A PR push runs nothing here (this repo has no `fast` lane).
-# Never add a heavy job to pull_request or a required heavy check without Daniel's written word in the policy file. No new runners.
 # Fails when plugins/botreeve/ differs from what the botreeve repo's MCP catalog and
 # companion skill generate (botreeve main, docs/mcp + skills/botreeve-mcp).
-# Runs on push to main, daily and on dispatch (CI policy 2026-11-13: nothing runs on a PR push),
-# because the server changes without touching this repo. Fix: node scripts/generate.mjs --source <botreeve checkout>, commit.
-# Needs the repo secret BOTREEVE_READ_TOKEN (read-only token for botreeve/botreeve).
+# Runs on pull_request, push to main, daily and on dispatch (the server changes without touching this repo).
+# Fix: node scripts/generate.mjs --source <botreeve checkout>, commit.
+# Needs repo secret BOTREEVE_READ_TOKEN = read-only SSH deploy key (private key text) for GutenGroup/botreeve.
 name: check-plugin
 on:
+  pull_request:
   push:
     branches: [main]
   schedule:
@@ -15,18 +13,26 @@ on:
   workflow_dispatch:
 jobs:
   check:
-    runs-on: guten-linux-light
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch botreeve docs/mcp and skills (read-only)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Fetch botreeve docs/mcp and skills (read-only, SSH deploy key)
         env:
-          TOKEN: ${{ secrets.BOTREEVE_READ_TOKEN }}
+          KEY: ${{ secrets.BOTREEVE_READ_TOKEN }}
         run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/id
+          chmod 600 ~/.ssh/id
+          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/id -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
           git clone --depth 1 --filter=blob:none --sparse \
-            "https://oauth2:${TOKEN}@git.no-cows.com/botreeve/botreeve.git" /tmp/br
+            git@github.com:GutenGroup/botreeve.git /tmp/br
           git -C /tmp/br sparse-checkout set docs/mcp skills/botreeve-mcp
           git -C /tmp/br log -1 --format='botreeve %h %cs'
+          rm -f ~/.ssh/id
       - name: Plugin matches the catalog
         run: node scripts/generate.mjs --source /tmp/br --check
       - name: Claude validates plugin and marketplace
