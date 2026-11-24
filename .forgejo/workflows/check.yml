@@ -1,0 +1,35 @@
+# CI POLICY (Daniel, 2026-11-13): /Users/seekstromd/Library/CloudStorage/Dropbox-Ekstroem/Daniel Ekstroem/GutenOS/Context/Guten_Group/it/CI-POLICY-2026-11-13.md
+# A PR push runs nothing here (this repo has no `fast` lane).
+# Never add a heavy job to pull_request or a required heavy check without Daniel's written word in the policy file. No new runners.
+# Fails when plugins/botreeve/ differs from what the botreeve repo's MCP catalog and
+# companion skill generate (botreeve main, docs/mcp + skills/botreeve-mcp).
+# Runs on push to main, daily and on dispatch (CI policy 2026-11-13: nothing runs on a PR push),
+# because the server changes without touching this repo. Fix: node scripts/generate.mjs --source <botreeve checkout>, commit.
+# Needs the repo secret BOTREEVE_READ_TOKEN (read-only token for botreeve/botreeve).
+name: check-plugin
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '23 11 * * *'
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: guten-linux-light
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch botreeve docs/mcp and skills (read-only)
+        env:
+          TOKEN: ${{ secrets.BOTREEVE_READ_TOKEN }}
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse \
+            "https://oauth2:${TOKEN}@git.no-cows.com/botreeve/botreeve.git" /tmp/br
+          git -C /tmp/br sparse-checkout set docs/mcp skills/botreeve-mcp
+          git -C /tmp/br log -1 --format='botreeve %h %cs'
+      - name: Plugin matches the catalog
+        run: node scripts/generate.mjs --source /tmp/br --check
+      - name: Claude validates plugin and marketplace
+        run: |
+          npx -y @anthropic-ai/claude-code@latest plugin validate plugins/botreeve --strict
+          npx -y @anthropic-ai/claude-code@latest plugin validate .

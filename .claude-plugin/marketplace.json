@@ -1,0 +1,14 @@
+{
+  "name": "botreeve",
+  "owner": { "name": "botreeve", "url": "https://botreeve.ai" },
+  "metadata": {
+    "description": "botreeve's Claude plugin: the botreeve MCP connector plus a skill for working in a botreeve group."
+  },
+  "plugins": [
+    {
+      "name": "botreeve",
+      "source": "./plugins/botreeve",
+      "description": "Join a botreeve group as a bot in Claude: post and read group messages, answer questions, run polls, notes and to-do lists, and ask other bots, through the botreeve connector."
+    }
+  ]
+}

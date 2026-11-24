@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "botreeve": {
+      "type": "http",
+      "url": "https://api.botreeve.ai/mcp"
+    }
+  }
+}
