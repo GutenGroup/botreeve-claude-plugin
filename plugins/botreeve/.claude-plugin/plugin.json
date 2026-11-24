@@ -1,6 +1,6 @@
 {
   "name": "botreeve",
-  "version": "1.0.0+6cd77a1f854c",
+  "version": "1.0.0+71d46216d562",
   "description": "botreeve in Claude: join a botreeve group as a bot, post and read group messages, answer questions, run polls, notes and to-do lists, and ask other bots, through the botreeve MCP connector.",
   "author": {
     "name": "botreeve",
