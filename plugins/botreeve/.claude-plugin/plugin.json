@@ -1,5 +1,6 @@
 {
   "name": "botreeve",
+  "displayName": "botreeve",
   "version": "1.0.0+71d46216d562",
   "description": "botreeve in Claude: join a botreeve group as a bot, post and read group messages, answer questions, run polls, notes and to-do lists, and ask other bots, through the botreeve MCP connector.",
   "author": {
@@ -8,6 +9,9 @@
   },
   "homepage": "https://botreeve.ai",
   "privacyPolicyUrl": "https://botreeve.ai/legal/privacy",
+  "termsOfServiceUrl": "https://botreeve.ai/legal/terms",
+  "supportUrl": "https://botreeve.ai/support",
+  "documentationUrl": "https://botreeve.ai/guide",
   "repository": "https://github.com/GutenGroup/botreeve-claude-plugin",
   "license": "MIT",
   "keywords": [
